@@ -1,34 +1,27 @@
-import Vimeo from '@vimeo/player';
+import Player from '@vimeo/player';
 import throttle from 'lodash.throttle';
 
 const iframe = document.querySelector('iframe');
-      const player = new Vimeo.Player(iframe);
-      
-      // Get current time from local storage or set to 0
-      let currentTime = localStorage.getItem('videoplayer-current-time') || 0;
-      
-      // Update current time in local storage
-      function updateCurrentTime(seconds) {
-        localStorage.setItem('videoplayer-current-time', seconds);
-      }
-      
-      // Listen for timeupdate event
-      player.on('timeupdate', function(data) {
-        updateCurrentTime(data.seconds);
-      });
-      
-      // Set player time to current time
-      player.setCurrentTime(currentTime).then(function(seconds) {
-        console.log('Playback started from:', seconds, 'seconds');
-      }).catch(function(error) {
-        switch (error.name) {
-          case 'RangeError':
-            console.error('Error: Time is out of range');
-            break;
-            
-          default:
-            console.error('Error:', error.message);
-            break;
-        }
-      });
+const player = new Player(iframe);
+const CURRENT_TIME = "videoplayer-current-time";
 
+function timeUpdate(data) {
+    console.log(data.seconds);
+    localStorage.setItem(CURRENT_TIME, data.seconds);
+}
+
+player.on('timeupdate', throttle(timeUpdate, 1000));
+
+const currentTime = JSON.parse(localStorage.getItem(CURRENT_TIME));
+
+player.setCurrentTime(currentTime).then(function(seconds) {
+}).catch(function(error) {
+    switch (error.name) {
+        case 'RangeError':
+            seconds < 0 || seconds > 571.52;
+            break;
+
+        default:
+            break;
+    }
+});
